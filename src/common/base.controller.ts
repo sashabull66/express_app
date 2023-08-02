@@ -1,5 +1,5 @@
 import {Response, Router} from "express";
-import {IRoute} from "./route.interface.js";
+import {IControllerRoute} from "./route.interface.js";
 import {ILogger} from "../logger/logger.interface.js";
 import {injectable} from "inversify";
 import 'reflect-metadata'
@@ -29,11 +29,13 @@ export abstract class BaseController {
         return res.sendStatus(201);
     }
 
-    protected bindRoutes (routes:IRoute[]) {
-        routes.forEach(({path, func, method})=>{
+    protected bindRoutes (routes:IControllerRoute[]) {
+        routes.forEach(({path, func, method, middlewares})=>{
             const handler = func.bind(this);
+            const middleware = middlewares?.map(m => m.execute.bind(m))
             this.logger.log(`${method} bind ${path}`);
-            this.router[method](path, handler);
+            const pipeline = middleware ? [...middleware, handler] : handler;
+            this.router[method](path, pipeline);
         })
     }
 }

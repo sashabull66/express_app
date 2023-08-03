@@ -5,6 +5,7 @@ import {validate} from "class-validator";
 import {inject, injectable} from "inversify";
 import {TYPES} from "../types.js";
 import {ILogger} from "../logger/logger.interface.js";
+import 'reflect-metadata'
 
 @injectable()
 export class ValidateMiddleware implements IMiddleware {

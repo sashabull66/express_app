@@ -1,4 +1,5 @@
 import {IsBoolean, IsString} from "class-validator";
+import 'reflect-metadata'
 
 export class TodoDto {
     @IsString({ message: 'Title указан не верно' })

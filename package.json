@@ -7,10 +7,9 @@
   "license": "UNLICENSED",
   "private": false,
   "scripts": {
-    "build:clean": "rm -rf dist",
-    "build": "yarn build:clean && tsc",
-    "start": "yarn build && node dist/main.js || yarn build:clean",
-    "start:clean": "node dist/main.js"
+    "clean": "rm -rf dist",
+    "build": "yarn clean && tsc",
+    "start": "yarn build && node dist/main.js"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",

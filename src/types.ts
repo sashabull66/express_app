@@ -4,6 +4,8 @@ export const TYPES = {
     TodoController: Symbol.for('TodoController'),
     TodoService: Symbol.for('TodoService'),
     ConfigService: Symbol.for('ConfigService'),
+    UsersService: Symbol.for('UsersService'),
+    UsersController: Symbol.for('UsersController'),
     ExceptionFilter: Symbol.for('ExceptionFilter'),
     MongoDBConfig: Symbol.for('MongoDBConfig')
 }

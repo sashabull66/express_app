@@ -1,14 +1,14 @@
 import express, { Express } from "express";
 import { Server } from 'http'
 import {TodosController} from "./todos/todos.controller.js";
+import {UsersController} from "./users/users.controller.js";
 import {ExceptionFilter} from "./errors/exception.filter.js";
 import {inject, injectable} from "inversify";
 import {TYPES} from "./types.js";
 import {ILogger} from "./logger/logger.interface.js";
 import pkg from "body-parser";
-// сделать этот импорт обязательно в каждом файле, где используются декораторы
-import 'reflect-metadata'
 import {ConfigService} from "./config/config.service.js";
+import 'reflect-metadata'
 
 @injectable()
 export class App {
@@ -20,7 +20,8 @@ export class App {
     constructor(
         @inject(TYPES.ILogger) private logger: ILogger,
         @inject(TYPES.ConfigService) private configService: ConfigService,
-        @inject(TYPES.TodoController) private userController: TodosController,
+        @inject(TYPES.TodoController) private todosController: TodosController,
+        @inject(TYPES.UsersController) private usersController: UsersController,
         @inject(TYPES.ExceptionFilter) private exceptionFilter: ExceptionFilter,
     ) {
         this.app = express();
@@ -28,16 +29,17 @@ export class App {
         this.baseUrl = this.configService.get('BASE_URL') || '/api';
     }
 
-    useMiddleware ():void {
+    useMiddleware (): void {
         // Нужен для работы с body (библиотека: body-parser)
         this.app.use(pkg.json())
     }
 
-    useRoutes ():void {
-        this.app.use(`${this.baseUrl}/todos`, this.userController.router);
+    useRoutes (): void {
+        this.app.use(`${this.baseUrl}/todos`, this.todosController.router);
+        this.app.use(`${this.baseUrl}/users`, this.usersController.router);
     }
 
-    useExceptionFilters ():void {
+    useExceptionFilters (): void {
         this.app.use(this.exceptionFilter.catch.bind(this.exceptionFilter))
     }
 

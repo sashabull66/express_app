@@ -3,12 +3,12 @@ import {NextFunction, Request, Response} from "express";
 import {injectable, inject} from "inversify";
 import {TYPES} from "../types.js";
 import {ILogger} from "../logger/logger.interface.js";
-import 'reflect-metadata'
 import {ITodosController} from "./todos.controller.interface.js";
 import {TodoDto} from "./dto/todo.dto.js";
 import {TodosService} from "./todos.service.js";
 import {HttpError} from "../errors/http-error.class.js";
 import {Todo} from "./todo.model.js";
+import 'reflect-metadata'
 
 @injectable()
 export class TodosController extends BaseController implements ITodosController {

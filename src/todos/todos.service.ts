@@ -6,6 +6,7 @@ import {ConfigService} from "../config/config.service.js";
 import {Todo, TodoModel} from "./todo.model.js";
 import { DocumentType } from "@typegoose/typegoose/lib/types.js";
 import {ITodosService} from "./todos.service.interface.js";
+import 'reflect-metadata'
 
 // Вся бизнес-логика будет находиться здесь
 @injectable()

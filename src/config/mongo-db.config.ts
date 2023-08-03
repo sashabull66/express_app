@@ -3,6 +3,7 @@ import {TYPES} from "../types.js";
 import {ConfigService} from "./config.service.js";
 import * as mongoose from "mongoose";
 import {ILogger} from "../logger/logger.interface.js";
+import 'reflect-metadata'
 
 @injectable()
 export class MongoDbConfig {

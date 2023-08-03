@@ -16,7 +16,6 @@ export class UsersService implements IUsersService {
     ) {}
 
     async createUser ({email, name, password}:UserRegisterDto): Promise<DocumentType<User> | null> {
-        // Если пользователь в базе есть вернуть null иначе вернуть созданного пользователя
         const foundUser = await UserModel.findOne({email}).exec();
 
         if (!foundUser) {

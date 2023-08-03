@@ -3,13 +3,13 @@ export class TodoEntity {
 
     get title():string {
         return this._title
-    }
+    };
 
     get description():string {
         return this._description
-    }
+    };
 
     get done():boolean {
         return  this._done
-    }
+    };
 }

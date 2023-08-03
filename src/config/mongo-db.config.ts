@@ -28,9 +28,9 @@ export class MongoDbConfig {
         const dbUri: string = this.getMongoUri();
         try {
             await mongoose.connect(dbUri);
-            this.logger.log(`Connected to DB SUCCESSFULLY [DB-URI] ${dbUri}`)
+            this.logger.log(`Connected to DB SUCCESSFULLY [DB-URI] ${dbUri}`);
         } catch (e) {
-            this.logger.error(e)
+            this.logger.error(e);
         }
     }
 }

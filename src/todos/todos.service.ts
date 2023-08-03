@@ -24,7 +24,7 @@ export class TodosService implements ITodosService {
                 description: newTodo.description,
                 done: newTodo.done
             })
-    }
+    };
 
     async removeTodo (id?: string): Promise<DocumentType<Todo> | null> {
         try {
@@ -34,19 +34,19 @@ export class TodosService implements ITodosService {
         } catch (e) {
             return  null
         }
-    }
+    };
 
     async updateTodo (todoData: Todo): Promise<Todo | null> {
-        const updUser = await TodoModel.updateOne({_id: todoData._id}, todoData)
+        const updUser = await TodoModel.updateOne({_id: todoData._id}, todoData);
 
         if (updUser) {
             return todoData
         } else {
             return null
         }
-    }
+    };
 
     async getTodos ():Promise<DocumentType<Todo>[] | null> {
         return await TodoModel.find().exec()
-    }
+    };
 }

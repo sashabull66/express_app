@@ -8,7 +8,7 @@ import {ILogger} from "../logger/logger.interface.js";
 
 @injectable()
 export class ValidateMiddleware implements IMiddleware {
-    constructor(private classToValidate: ClassConstructor<object>, @inject(TYPES.ILogger) private logger:ILogger,) {}
+    constructor(private classToValidate: ClassConstructor<object>, @inject(TYPES.ILogger) private logger: ILogger) {}
 
     async execute ({body}: Request, res: Response, next: NextFunction): Promise<void> {
         const instance = plainToInstance(this.classToValidate, body);
@@ -24,5 +24,5 @@ export class ValidateMiddleware implements IMiddleware {
         } else {
             next();
         }
-    }
+    };
 }

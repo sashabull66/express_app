@@ -4,14 +4,14 @@ import {ILogger} from "./logger/logger.interface.js";
 import {LoggerService} from "./logger/logger.service.js";
 import {TYPES} from "./types.js";
 import {ExceptionFilter} from "./errors/exception.filter.js";
-import {UsersController} from "./users/users.controller.js";
+import {TodosController} from "./todos/todos.controller.js";
 import {IExceptionFilter} from "./errors/exception.filter.interface.js";
-import {IUsersController} from "./users/users.controller.interface.js";
-import {UsersService} from "./users/users.service.js";
-import {IUsersService} from "./users/users.service.interface.js";
+import {TodosService} from "./todos/todos.service.js";
 import {IConfigService} from "./config/config.service.interface.js";
 import {ConfigService} from "./config/config.service.js";
 import {MongoDbConfig} from "./config/mongo-db.config.js";
+import {ITodosController} from "./todos/todos.controller.interface.js";
+import {ITodosService} from "./todos/todos.service.interface.js";
 
 // По хорошему биндинги нужно выносить в разные файлы в зависимости от доменной зоны
 export const appBindings = new ContainerModule((bind: interfaces.Bind) => {
@@ -19,8 +19,8 @@ export const appBindings = new ContainerModule((bind: interfaces.Bind) => {
     bind<ILogger>(TYPES.ILogger).to(LoggerService).inSingletonScope();
     bind<IConfigService>(TYPES.ConfigService).to(ConfigService).inSingletonScope();
     bind<IExceptionFilter>(TYPES.ExceptionFilter).to(ExceptionFilter).inSingletonScope();
-    bind<IUsersController>(TYPES.UserController).to(UsersController).inSingletonScope();
-    bind<IUsersService>(TYPES.UserService).to(UsersService).inSingletonScope();
+    bind<ITodosController>(TYPES.TodoController).to(TodosController).inSingletonScope();
+    bind<ITodosService>(TYPES.TodoService).to(TodosService).inSingletonScope();
     bind<App>(TYPES.Application).to(App).inSingletonScope();
     bind<MongoDbConfig>(TYPES.MongoDBConfig).to(MongoDbConfig).inSingletonScope();
 })

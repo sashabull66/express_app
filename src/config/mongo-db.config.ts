@@ -24,11 +24,11 @@ export class MongoDbConfig {
             this.configService.get("MONGO_AUTH_DB");
     }
 
-    public connectToDB ():void {
+    public async connectToDB (): Promise<void> {
         const dbUri: string = this.getMongoUri();
-        this.logger.log(`[DB-URI] ${dbUri}`)
         try {
-            mongoose.connect(dbUri)
+            await mongoose.connect(dbUri);
+            this.logger.log(`Connected to DB SUCCESSFULLY [DB-URI] ${dbUri}`)
         } catch (e) {
             this.logger.error(e)
         }

@@ -7,13 +7,15 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
+      - SALT=10
+      - PORT=4200
+      - BASE_URL=/api
+      - JWT_SECRET=test
       - MONGO_LOGIN=admin
       - MONGO_PASSWORD=admin
-      - MONGO_HOST=mongo-db
+      - MONGO_HOST=localhost
       - MONGO_PORT=27017
       - MONGO_AUTH_DB=admin
-      - JWT_SECRET=test
-      - PORT=4200
     ports:
       - 4200:4200
     depends_on:

@@ -16,8 +16,8 @@ export class UsersService implements IUsersService {
         private readonly configService: ConfigService
     ) {}
 
-    async login ({email, password}: UserLoginDto): Promise<DocumentType<UserLoginDto> | null> {
-        const foundUser = await UserModel.findOne({ email, password }).exec();
+    async login ({ email }: Pick<UserLoginDto, 'email'>): Promise<DocumentType<User> | null> {
+        const foundUser = await UserModel.findOne({ email }).exec();
 
         return foundUser || null
     };

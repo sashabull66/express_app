@@ -9,6 +9,7 @@ import {ILogger} from "./logger/logger.interface.js";
 import pkg from "body-parser";
 import {ConfigService} from "./config/config.service.js";
 import 'reflect-metadata'
+import {AuthMiddleware} from "./common/auth.middleware.js";
 
 @injectable()
 export class App {
@@ -30,8 +31,15 @@ export class App {
     }
 
     useMiddleware (): void {
+        const secret = this.configService.get('JWT_SECRET');
+        /**
+         * Middleware которые будет брать из request.headers.authorization jwt токен,
+         * парсить его и класть в этот же request role и login из токена.
+         * */
+        const authMiddleware = new AuthMiddleware(secret);
         // Нужен для работы с body (библиотека: body-parser)
-        this.app.use(pkg.json())
+        this.app.use(pkg.json());
+        this.app.use(authMiddleware.execute.bind(authMiddleware));
     }
 
     useRoutes (): void {

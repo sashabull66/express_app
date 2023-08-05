@@ -13,8 +13,7 @@ export class AuthMiddleware implements IMiddleware {
                 if (error) {
                     next()
                 } else if (decoded && typeof decoded === 'object') {
-                    req.user = decoded.email;
-                    req.role = decoded.role;
+                    req.user = decoded as { email: string, id: string, role: 'admin' | 'user'};
                     next();
                 }
             })

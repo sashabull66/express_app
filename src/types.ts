@@ -9,3 +9,8 @@ export const TYPES = {
     ExceptionFilter: Symbol.for('ExceptionFilter'),
     MongoDBConfig: Symbol.for('MongoDBConfig')
 }
+
+export interface ICriteria {
+    id?: string,
+    userId?: string
+}

@@ -8,4 +8,6 @@ export class TodoDto {
     description: string;
     @IsBoolean()
     done: boolean;
+    @IsString()
+    userId: string;
 }

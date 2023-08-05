@@ -1,7 +1,7 @@
 import {TodoDto} from "./dto/todo.dto.js";
 import {TodoEntity} from "./todo.entity.js";
 import {inject, injectable} from "inversify";
-import {TYPES} from "../types.js";
+import {ICriteria, TYPES} from "../types.js";
 import {ConfigService} from "../config/config.service.js";
 import {Todo, TodoModel} from "./todo.model.js";
 import { DocumentType } from "@typegoose/typegoose/lib/types.js";
@@ -16,20 +16,21 @@ export class TodosService implements ITodosService {
         private readonly configService: ConfigService
     ) {}
 
-    async createTodo ({title, description, done}:TodoDto): Promise<DocumentType<Todo> | null> {
+    async createTodo ({ title, description, done, userId }: TodoDto): Promise<DocumentType<Todo> | null> {
 
-        const newTodo = new TodoEntity(title, description, done)
+        const newTodo = new TodoEntity(title, description, done, userId)
 
         return await TodoModel.create({
                 title: newTodo.title,
                 description: newTodo.description,
-                done: newTodo.done
+                done: newTodo.done,
+                userId: newTodo.userId
             })
     };
 
-    async removeTodo (id?: string): Promise<DocumentType<Todo> | null> {
+    async removeTodo (criteria: ICriteria): Promise<DocumentType<Todo> | null> {
         try {
-            const deletedTodo = await TodoModel.findOneAndRemove({_id: id}).exec();
+            const deletedTodo = await TodoModel.findOneAndRemove(criteria).exec();
 
             return deletedTodo || null
         } catch (e) {
@@ -37,8 +38,8 @@ export class TodosService implements ITodosService {
         }
     };
 
-    async updateTodo (todoData: Todo): Promise<Todo | null> {
-        const updUser = await TodoModel.updateOne({_id: todoData._id}, todoData);
+    async updateTodo (todoData: Todo, userId?: string): Promise<Todo | null> {
+        const updUser = await TodoModel.updateOne({_id: todoData._id, userId}, todoData);
 
         if (updUser) {
             return todoData
@@ -47,7 +48,11 @@ export class TodosService implements ITodosService {
         }
     };
 
-    async getTodos ():Promise<DocumentType<Todo>[] | null> {
-        return await TodoModel.find().exec()
+    async getTodos (criteria: ICriteria): Promise<DocumentType<Todo>[] | null> {
+        return await TodoModel.find(
+            criteria,
+            // Выборка нужных полей
+            { title: 1, description: 1, done: 1, _id: 1 }
+        ).exec()
     };
 }

@@ -14,6 +14,7 @@ import pk from "bcryptjs";
 import 'reflect-metadata'
 import {ConfigService} from "../config/config.service.js";
 import {AuthGuard} from "../common/auth.guard.js";
+import { Types } from "mongoose";
 
 @injectable()
 export class UsersController extends BaseController implements IUsersController {
@@ -58,11 +59,11 @@ export class UsersController extends BaseController implements IUsersController 
             if (!isValidPass) {
                 return next(new HttpError(401, 'Ошибка авторизации', 'login'));
             } else {
-                const { email, role } = result;
+                const { email, role, _id } = result;
                 const secret = this.configService.get('JWT_SECRET');
-                const jwt = await this.signJWT({ email, role }, secret);
+                const jwt = await this.signJWT({ id: _id, email, role }, secret);
 
-                this.ok(res, { jwt });
+                this.ok(res, { jwt, email, role });
             }
         }
     };
@@ -77,11 +78,11 @@ export class UsersController extends BaseController implements IUsersController 
         this.ok(res, result);
     };
 
-    async info ({ user, role }: Request, res: Response, next: NextFunction): Promise<void> {
-        this.ok(res, {user, role})
+    async info ({ user }: Request, res: Response, next: NextFunction): Promise<void> {
+        this.ok(res, user)
     }
 
-    private signJWT (data: { email: string, role: string }, secret: string):Promise<string> {
+    private signJWT (data: { email: string, role: string, id: Types.ObjectId }, secret: string):Promise<string> {
         return new Promise((resolve, reject) => {
             pkg.sign({
                 ...data,

@@ -13,6 +13,9 @@ export class Todo extends TimeStamps {
 
     @prop({ required:true })
     public done: boolean;
+
+    @prop({ required:true })
+    public userId: string;
 }
 
 export const TodoModel = getModelForClass(Todo);

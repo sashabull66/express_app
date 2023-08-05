@@ -10,6 +10,7 @@ import pkg from "body-parser";
 import {ConfigService} from "./config/config.service.js";
 import 'reflect-metadata'
 import {AuthMiddleware} from "./common/auth.middleware.js";
+import cors from 'cors'
 
 @injectable()
 export class App {
@@ -52,6 +53,8 @@ export class App {
     }
 
     public async init () {
+        // Для кросдоменных запросов
+        this.app.use(cors())
         this.useMiddleware();
         this.useRoutes();
         this.useExceptionFilters();

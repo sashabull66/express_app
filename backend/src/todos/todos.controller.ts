@@ -59,7 +59,7 @@ export class TodosController extends BaseController implements ITodosController 
 
         const result = await this.todosService.getTodos(criteria);
 
-        if (!result?.length) {
+        if (!result) {
             return next(new HttpError(404, 'Задачи не найдены', 'todos'));
         }
 
@@ -67,13 +67,13 @@ export class TodosController extends BaseController implements ITodosController 
     };
 
     async createTodo (req:Request<{}, {}, TodoDto>, res:Response):Promise<void> {
-        const result = await this.todosService.createTodo(req.body);
+        const result = await this.todosService.createTodo({...req.body, userId: req.user.id});
 
         if (result) this.created(res);
     };
 
-    async  removeTodo (req:Request<{}, {}, TodoDto, { id: string }>, res:Response, next:NextFunction):Promise<void> {
-        let criteria: ICriteria = { id: req.query.id };
+    async  removeTodo (req:Request<{}, {}, {}, { id: string }>, res:Response, next:NextFunction):Promise<void> {
+        let criteria: ICriteria = { _id: req.query.id };
 
         if (req.user.role === 'user') {
             criteria.userId = req.user.id

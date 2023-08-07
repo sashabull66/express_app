@@ -4,7 +4,7 @@ services:
     container_name: express
     restart: always
     build:
-      context: .
+      context: backend
       dockerfile: Dockerfile
     environment:
       - SALT=10
@@ -13,13 +13,23 @@ services:
       - JWT_SECRET=test
       - MONGO_LOGIN=admin
       - MONGO_PASSWORD=admin
-      - MONGO_HOST=localhost
+      - MONGO_HOST=mongo-db
       - MONGO_PORT=27017
       - MONGO_AUTH_DB=admin
     ports:
       - 4200:4200
     depends_on:
       - mongo-db
+  front-server:
+    container_name: front
+    restart: always
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    depends_on:
+      - express-server
   mongo-db:
     image: mongo
     container_name: mongo-db

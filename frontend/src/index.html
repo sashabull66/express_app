@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.muicss.com/mui-latest/css/mui.min.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.muicss.com/mui-latest/js/mui.min.js"></script>
+    <title>Авторизация</title>
+</head>
+<body>
+<div id="sidebar">
+    <div class="mui--text-white mui--text-display1 mui--align-vertical">Todo Page</div>
+    <div class="mui--text-black-54 mui--text-body2" id="user"></div>
+    <button class="mui-btn mui-btn--accent" id="logout-btn">Выйти</button>
+</div>
+<div id="content" class="mui-container-fluid">
+    <div class="mui-row">
+        <div class="mui-col-sm-10 mui-col-sm-offset-1" id="app">
+            <!--Ниже неавторизованная зона!!!-->
+            <br>
+            <form class="mui-form" id="auth-form">
+                <legend>Введите данные пользователя</legend>
+                <div class="mui-textfield mui-textfield--float-label">
+                    <input type="email" required id="email">
+                    <label for="email">email</label>
+                </div>
+                <div class="mui-textfield mui-textfield--float-label">
+                    <input type="password" required id="password" minlength="5">
+                    <label for="password">password</label>
+                </div>
+                <button type="submit" class="mui-btn mui-btn--accent" id="add-todo-submit-btn">Отправить</button>
+            </form>
+            <!--Ниже авторизованная зона!!!-->
+            <button class="mui-btn mui-btn--accent" id="todos-btn" >Get todos</button>
+           <div id="todos-title">
+           </div>
+            <!--Форма создания новой задачи!!!-->
+            <template id="add-todo-form-template">
+                <form class="mui-form" id="add-todo-form">
+                    <legend>Добавление новой задачи</legend>
+                    <div class="mui-textfield mui-textfield--float-label">
+                        <input type="text" required id="title">
+                        <label for="title">Описание</label>
+                    </div>
+                    <div class="mui-textfield mui-textfield--float-label">
+                        <input type="text" required id="description">
+                        <label for="description">Детали</label>
+                    </div>
+                    <button type="submit" class="mui-btn mui-btn--accent" id="submit-btn">Отправить</button>
+                </form>
+            </template>
+        </div>
+    </div>
+</div>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8b253dfea2ab4077af8c6f58422dfbfd1689876627854"
+        integrity="sha512-bjgnUKX4azu3dLTVtie9u6TKqgx29RBwfj3QXYt5EKfWM/9hPSAI/4qcV5NACjwAo8UtTeWefx6Zq5PHcMm7Tg=="
+        data-cf-beacon='{"rayId":"7f19c99e0d6f3a83","token":"c8bda678e8c641c3bc7781653b8a1835","version":"2023.7.0","si":100}'
+        crossorigin="anonymous"></script>
+</body>
+</html>

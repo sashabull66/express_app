@@ -1,0 +1,71 @@
+/**
+ * Body CSS
+ */
+
+html,
+body {
+    height: 100%;
+}
+
+html,
+body,
+input,
+textarea,
+button {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.004);
+}
+
+
+/**
+ * Sidebar CSS
+ */
+
+#sidebar {
+    background-color: #E57373;
+    padding: 15px;
+}
+
+@media (min-width: 768px) {
+    #sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 180px;
+        height: 100%;
+        padding-top: 30px;
+    }
+}
+
+
+/**
+ * Content CSS
+ */
+@media (min-width: 768px) {
+    #content {
+        margin-left: 180px;
+    }
+}
+
+#logout-btn {
+    display: none;
+}
+
+.strike {
+    text-decoration: line-through;
+}
+
+.todo {
+    position: relative;
+    z-index: 0;
+    border:1px solid #aaa;
+    margin-bottom: 4px;
+}
+
+.todo > button {
+    z-index: 5;
+    position: absolute;
+    right: 9px;
+    top: 30%;
+}

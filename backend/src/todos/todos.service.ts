@@ -38,10 +38,10 @@ export class TodosService implements ITodosService {
         }
     };
 
-    async updateTodo (todoData: Todo, userId?: string): Promise<Todo | null> {
-        const updUser = await TodoModel.updateOne({_id: todoData._id, userId}, todoData);
+    async updateTodo (todoData: Todo): Promise<Todo | null> {
+        const updTodo = await TodoModel.updateOne({_id: todoData._id}, todoData);
 
-        if (updUser) {
+        if (updTodo) {
             return todoData
         } else {
             return null
@@ -49,10 +49,16 @@ export class TodosService implements ITodosService {
     };
 
     async getTodos (criteria: ICriteria): Promise<DocumentType<Todo>[] | null> {
-        return await TodoModel.find(
-            criteria,
-            // Выборка нужных полей
-            { title: 1, description: 1, done: 1, _id: 1 }
-        ).exec()
+        try {
+            const todos = await TodoModel.find(
+                criteria,
+                // Выборка нужных полей
+                { title: 1, description: 1, done: 1, _id: 1 }
+            ).exec()
+
+            return todos || null
+        } catch (e) {
+            return  null
+        }
     };
 }

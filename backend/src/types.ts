@@ -12,5 +12,6 @@ export const TYPES = {
 
 export interface ICriteria {
     id?: string,
+    _id?: string,
     userId?: string
 }

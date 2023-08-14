@@ -1,6 +1,7 @@
 import {IMiddleware} from "./middleware.interface.js";
 import {NextFunction, Request, Response} from "express";
 import pkg from 'jsonwebtoken'
+import {IUserData} from "../types.js";
 
 export class AuthMiddleware implements IMiddleware {
     constructor(private secret: string) {}
@@ -13,7 +14,7 @@ export class AuthMiddleware implements IMiddleware {
                 if (error) {
                     next()
                 } else if (decoded && typeof decoded === 'object') {
-                    req.user = decoded as { email: string, id: string, role: 'admin' | 'user'};
+                    req.user = decoded as IUserData;
                     next();
                 }
             })

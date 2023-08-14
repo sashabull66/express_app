@@ -1,7 +1,7 @@
 import {inject, injectable} from "inversify";
 import {BaseController} from "../common/base.controller.js";
 import {IUsersController} from "./users.controller.interface.js";
-import {TYPES} from "../types.js";
+import {IUserData, TYPES} from "../types.js";
 import {ILogger} from "../logger/logger.interface.js";
 import {HttpError} from "../errors/http-error.class.js";
 import {NextFunction, Request, Response} from "express";
@@ -14,7 +14,6 @@ import pk from "bcryptjs";
 import 'reflect-metadata'
 import {ConfigService} from "../config/config.service.js";
 import {AuthGuard} from "../common/auth.guard.js";
-import { Types } from "mongoose";
 
 @injectable()
 export class UsersController extends BaseController implements IUsersController {
@@ -42,53 +41,132 @@ export class UsersController extends BaseController implements IUsersController 
                 middlewares: [new ValidateMiddleware(UserRegisterDto, loggerService)],
             },
             {
-                path:'/info',
-                func: this.info,
+                path:'/logout',
+                func: this.logout,
                 method: 'get',
                 middlewares: [new AuthGuard()],
+            },
+            {
+                path:'/refresh',
+                func: this.refresh,
+                method: 'get',
             },
         ]);
         }
 
     async login (req: Request<{}, {}, UserLoginDto>, res: Response, next: NextFunction): Promise<void> {
-        const result = await this.usersService.login({ email: req.body.email });
+        try {
+            const user = await this.usersService.login({ email: req.body.email });
 
-        if (result) {
-            const isValidPass = await this.comparePassword(req.body.password, result.password);
+            if (user) {
+                const isValidPass = await this.comparePassword(req.body.password, user.password);
 
-            if (!isValidPass) {
-                return next(new HttpError(401, 'Ошибка авторизации', 'login'));
+                if (!isValidPass) {
+                    return next(new HttpError(401, 'Неверный пароль', 'login'));
+                } else {
+                    const { email, role, _id: id, name } = user;
+
+                    const accessTokenSecret = this.configService.get('ACCESS_TOKEN_SECRET');
+                    const accessToken = await this.signJWT({ id, email, role }, accessTokenSecret, '1m');
+
+                    const refreshTokenSecret = this.configService.get('REFRESH_TOKEN_SECRET');
+                    const refreshToken = await this.signJWT({ id, email, role }, refreshTokenSecret, '30d');
+
+                    await this.usersService.saveToken({ refreshToken, userId: id })
+
+                    res.cookie('refresh_token', refreshToken, {
+                        httpOnly: true
+                    })
+                    this.ok(res, { email, role, name, access_token: accessToken });
+                }
             } else {
-                const { email, role, _id } = result;
-                const secret = this.configService.get('JWT_SECRET');
-                const jwt = await this.signJWT({ id: _id, email, role }, secret);
-
-                this.ok(res, { jwt, email, role });
+                return next(new HttpError(401, 'Пользователь не существует', 'login'));
             }
+        } catch (e) {
+            return next(new HttpError(500, 'Ошибка', 'login'));
         }
     };
 
     async register (req: Request<{}, {}, UserRegisterDto>, res: Response, next: NextFunction): Promise<void> {
-        const result = await this.usersService.register(req.body);
+        const newUser = await this.usersService.register(req.body);
 
-        if (!result) {
+        if (!newUser) {
             return next(new HttpError(422, 'Не удалось создать пользователя', 'users'));
         }
 
-        this.ok(res, result);
+        this.ok(res, {});
     };
 
-    async info ({ user }: Request, res: Response, next: NextFunction): Promise<void> {
-        this.ok(res, user)
+    async logout (req: Request, res: Response, next: NextFunction): Promise<void> {
+        await this.usersService.logout(req.user.id)
+        res.clearCookie('access_token');
+        res.clearCookie('refresh_token');
+        this.ok(res, 'Logout success')
     }
 
-    private signJWT (data: { email: string, role: string, id: Types.ObjectId }, secret: string):Promise<string> {
+    async refresh (req: Request, res: Response, next: NextFunction): Promise<void> {
+        const { refresh_token } = req.cookies;
+
+        if (!refresh_token) {
+            return next(new HttpError(401, 'Отсутствует refresh токен', 'refresh'))
+        }
+
+        try {
+            const refreshTokenFromDB = await this.usersService.getRefreshToken(refresh_token);
+            if (!refreshTokenFromDB) {
+                return next(new HttpError(401, 'Неверные учетные данные', 'refresh'))
+            }
+
+            const verifiedData = await this.verifyRefreshToken(refresh_token);
+            const userData = await this.usersService.getUserById(refreshTokenFromDB.userId)
+
+            if (!verifiedData && !userData) {
+                return next(new HttpError(401, 'Невалидный refresh токен', 'refresh'))
+            }
+
+            if (userData) {
+                const accessTokenSecret = this.configService.get('ACCESS_TOKEN_SECRET');
+                const accessToken = await this.signJWT(userData, accessTokenSecret, '5s');
+
+                const refreshTokenSecret = this.configService.get('REFRESH_TOKEN_SECRET');
+                const refreshToken = await this.signJWT(userData, refreshTokenSecret, '30d');
+
+                await this.usersService.saveToken({ refreshToken, userId: userData._id })
+
+                res.cookie('refresh_token', refreshToken, {
+                    httpOnly: true
+                })
+
+                const { email, role, name } = userData;
+
+                this.ok(res, { email, role, name, access_token: accessToken });
+            }
+        } catch (e) {
+            return next(new HttpError(500, 'Ошибка', 'refresh'))
+        }
+    }
+
+    private verifyRefreshToken (refreshToken: string):Promise<IUserData | null> {
+            const secret = this.configService.get('REFRESH_TOKEN_SECRET');
+            return new Promise((resolve, reject) => {
+                pkg.verify(refreshToken, secret, (error, decoded) => {
+                    if (error) {
+                        reject(null)
+                    } else if (decoded) {
+                        resolve(decoded as IUserData)
+                    }
+                })
+            })
+    }
+
+    private signJWT (data: IUserData | Record<string, any>, secret: string, expiresIn:string): Promise<string> {
         return new Promise((resolve, reject) => {
             pkg.sign({
                 ...data,
                 iat: Math.floor(Date.now() / 1000)
             }, secret, {
-                algorithm:'HS256'
+                algorithm:'HS256',
+                expiresIn
             }, (error, encoded)=>{
                 if (error) {
                     reject(error)

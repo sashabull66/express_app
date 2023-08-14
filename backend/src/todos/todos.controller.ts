@@ -82,7 +82,7 @@ export class TodosController extends BaseController implements ITodosController 
         const result = await this.todosService.removeTodo(criteria);
 
         if (!result) {
-            return next(new HttpError(422, `Не удалось удалить задачу ${ criteria.id }`, 'todo'));
+            return next(new HttpError(422, `Не удалось удалить задачу ${ criteria._id }`, 'todo'));
         }
 
         this.ok(res, `Задача ${ criteria.id } успешно удалена`);

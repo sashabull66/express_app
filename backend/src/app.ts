@@ -10,7 +10,7 @@ import pkg from "body-parser";
 import {ConfigService} from "./config/config.service.js";
 import 'reflect-metadata'
 import {AuthMiddleware} from "./common/auth.middleware.js";
-import cors from 'cors'
+import cookieParser from 'cookie-parser/index.js'
 
 @injectable()
 export class App {
@@ -32,7 +32,7 @@ export class App {
     }
 
     useMiddleware (): void {
-        const secret = this.configService.get('JWT_SECRET');
+        const secret = this.configService.get('ACCESS_TOKEN_SECRET');
         /**
          * Middleware которые будет брать из request.headers.authorization jwt токен,
          * парсить его и класть в этот же request role и login из токена.
@@ -52,9 +52,20 @@ export class App {
         this.app.use(this.exceptionFilter.catch.bind(this.exceptionFilter))
     }
 
+    useLogPath (): void {
+        this.app.all(/.*/, (req, res, next) =>{
+            this.logger.warn("path: ", req.path)
+            next()
+        })
+    }
+
+    useCookie (): void {
+        this.app.use(cookieParser());
+    }
+
     public async init () {
-        // Для кросдоменных запросов
-        this.app.use(cors())
+        this.useCookie();
+        this.useLogPath();
         this.useMiddleware();
         this.useRoutes();
         this.useExceptionFilters();

@@ -4,7 +4,7 @@ import {inject, injectable} from "inversify";
 import {ICriteria, TYPES} from "../types.js";
 import {ConfigService} from "../config/config.service.js";
 import {Todo, TodoModel} from "./todo.model.js";
-import { DocumentType } from "@typegoose/typegoose/lib/types.js";
+import {DocumentType} from "@typegoose/typegoose/lib/types.js";
 import {ITodosService} from "./todos.service.interface.js";
 import 'reflect-metadata'
 
@@ -50,13 +50,11 @@ export class TodosService implements ITodosService {
 
     async getTodos (criteria: ICriteria): Promise<DocumentType<Todo>[] | null> {
         try {
-            const todos = await TodoModel.find(
+            return await TodoModel.find(
                 criteria,
                 // Выборка нужных полей
-                { title: 1, description: 1, done: 1, _id: 1 }
+                {title: 1, description: 1, done: 1, _id: 1}
             ).exec()
-
-            return todos || null
         } catch (e) {
             return  null
         }

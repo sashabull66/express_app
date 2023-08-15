@@ -12,6 +12,13 @@ export interface IRegisterRequest {
     password: string,
 }
 
+export interface IUpdateUserRequest {
+    _id: string,
+    email?: string,
+    role?: 'admin' | 'user',
+    name?: string,
+}
+
 export interface ILoginResponse {
     access_token: string,
     email: string,
@@ -19,16 +26,29 @@ export interface ILoginResponse {
     name: string,
 }
 
-export interface IRegisterResponse {
+export type IRegisterResponse =  {
+    _id: string,
     email: string,
     role: 'admin' | 'user',
     name: string,
 }
 
 export interface ILogin {
-    (params:ILoginRequest):AxiosPromise<ILoginResponse>
+    (params:ILoginRequest): AxiosPromise<ILoginResponse>
 }
 
 export interface IRegister {
-    (params:IRegisterRequest):AxiosPromise<IRegisterResponse>
+    (params:IRegisterRequest): AxiosPromise<IRegisterResponse>
+}
+
+export interface IGetUsers {
+    (): AxiosPromise<Array<IRegisterResponse>>
+}
+
+export interface IRemoveUser {
+    (id:string): AxiosPromise<string>
+}
+
+export interface IUpdateUser {
+    (params:IUpdateUserRequest): AxiosPromise<string>
 }

@@ -4,6 +4,8 @@ import {useAppDispatch, useAppSelector} from "../../../store";
 import {LogoutUser} from "../../../store/auth/action-creators";
 import {Grid} from "@alfalab/core-components/grid";
 import {NavLink} from "react-router-dom";
+import {removeTodos} from "../../../store/todos/todos-reducer";
+import {removeUsersData} from "../../../store/admin/admin-reducer";
 
 export const Header = () => {
     const dispatch = useAppDispatch()
@@ -12,6 +14,8 @@ export const Header = () => {
 
     const onClickHandler = () =>{
         dispatch(LogoutUser())
+        dispatch(removeTodos())
+        dispatch(removeUsersData())
     }
 
     return (

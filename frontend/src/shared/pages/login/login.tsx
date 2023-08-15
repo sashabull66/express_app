@@ -19,7 +19,12 @@ export const Login: React.FC = () => {
     useEffect(() => {
         if (profile) {
             const prevPath = window.localStorage.getItem('prevPath')
-            navigate(prevPath || '/dashboard');
+            if (prevPath?.includes('login') || prevPath?.includes('register')) {
+                navigate('/dashboard');
+            } else {
+                navigate(prevPath || '/dashboard');
+            }
+
             prevPath && window.localStorage.removeItem('prevPath')
         }
     }, [profile])

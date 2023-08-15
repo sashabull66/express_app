@@ -1,4 +1,4 @@
-import {ILogin, ILoginResponse, IRegister, IRegisterResponse} from "./types";
+import {IGetUsers, ILogin, ILoginResponse, IRegister, IRegisterResponse, IRemoveUser} from "./types";
 import AxiosInstance from "../instance";
 import {BASE_URL, Endpoints} from "../endpoints";
 import axios from "axios";
@@ -15,3 +15,7 @@ export const Refresh = () => axios.get<ILoginResponse>(Endpoints.AUTH.REFRESH, {
             withCredentials: true,
             baseURL: BASE_URL
         })
+
+export const GetUsers:IGetUsers = () => AxiosInstance.get<Array<IRegisterResponse>>(Endpoints.AUTH.ROOT);
+
+export const RemoveUser:IRemoveUser = (id) => AxiosInstance.delete<string>(Endpoints.AUTH.USER, { params: { id } });

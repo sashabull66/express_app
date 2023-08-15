@@ -3,11 +3,13 @@ import logger from "redux-logger";
 import {TypedUseSelectorHook, useDispatch, useSelector} from "react-redux";
 import AuthReducer from "./auth/auth-reducer";
 import TodosReducer from "./todos/todos-reducer";
+import AdminReducer from "./admin/admin-reducer";
 
 export const store = configureStore({
     reducer: {
         auth: AuthReducer,
-        todos: TodosReducer
+        todos: TodosReducer,
+        admin: AdminReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().concat(...(

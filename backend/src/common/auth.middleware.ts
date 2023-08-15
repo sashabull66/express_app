@@ -14,7 +14,8 @@ export class AuthMiddleware implements IMiddleware {
                 if (error) {
                     next()
                 } else if (decoded && typeof decoded === 'object') {
-                    req.user = decoded as IUserData;
+                    // Баг в либе jsonwebtoken, фикс - использовать Object(payload)
+                    req.user = Object(decoded) as IUserData;
                     next();
                 }
             })

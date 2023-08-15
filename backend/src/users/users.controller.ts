@@ -14,6 +14,8 @@ import pk from "bcryptjs";
 import 'reflect-metadata'
 import {ConfigService} from "../config/config.service.js";
 import {AuthGuard} from "../common/auth.guard.js";
+import {User} from "./user.model.js";
+import {Types} from "mongoose";
 
 @injectable()
 export class UsersController extends BaseController implements IUsersController {
@@ -51,11 +53,28 @@ export class UsersController extends BaseController implements IUsersController 
                 func: this.refresh,
                 method: 'get',
             },
+            {
+                path:'/user',
+                func: this.updateUser,
+                method: 'patch',
+               // middlewares: [new AuthGuard(true)],
+            },
+            {
+                path:'/user',
+                func: this.deleteUser,
+                method: 'delete',
+                // middlewares: [new AuthGuard(true)],
+            },
+            {
+                path:'/',
+                func: this.getUsers,
+                method: 'get',
+                // middlewares: [new AuthGuard(true)],
+            },
         ]);
         }
 
     async login (req: Request<{}, {}, UserLoginDto>, res: Response, next: NextFunction): Promise<void> {
-        try {
             const user = await this.usersService.login({ email: req.body.email });
 
             if (user) {
@@ -82,20 +101,43 @@ export class UsersController extends BaseController implements IUsersController 
             } else {
                 return next(new HttpError(401, 'Пользователь не существует', 'login'));
             }
-        } catch (e) {
-            return next(new HttpError(500, 'Ошибка', 'login'));
-        }
     };
 
-    async register (req: Request<{}, {}, UserRegisterDto>, res: Response, next: NextFunction): Promise<void> {
+    async register (req: Request<{}, {}, User>, res: Response, next: NextFunction): Promise<void> {
         const newUser = await this.usersService.register(req.body);
 
         if (!newUser) {
             return next(new HttpError(422, 'Не удалось создать пользователя', 'users'));
         }
 
-        this.ok(res, {});
+        this.ok(res, { _id: newUser._id, name: newUser.name, email: newUser.email });
     };
+
+    async updateUser (req: Request<{}, {}, User>, res: Response, next: NextFunction): Promise<void> {
+        const updatedUser = await this.usersService.updateUserData(req.body)
+
+        if (updatedUser) {
+            this.ok(res, 'Данные пользователя обновлены')
+        } else {
+            return next(new HttpError(500, 'Не удалось обновить данные пользователя', 'update-user'))
+        }
+    }
+
+    async deleteUser (req: Request<{}, {}, {}, { id: Types.ObjectId }>, res: Response, next: NextFunction): Promise<void> {
+        const deletedUser = await this.usersService.removeUser(req.query.id)
+
+        if (deletedUser) {
+            this.ok(res, 'Пользователь удален')
+        } else {
+            return next(new HttpError(500, 'Не удалось удалить пользователя', 'update-user'))
+        }
+    }
+
+    async getUsers (req: Request, res: Response, next: NextFunction): Promise<void> {
+        const users = await this.usersService.getUsers();
+
+        this.ok(res, users || [])
+    }
 
     async logout (req: Request, res: Response, next: NextFunction): Promise<void> {
         await this.usersService.logout(req.user.id)
@@ -111,7 +153,6 @@ export class UsersController extends BaseController implements IUsersController 
             return next(new HttpError(401, 'Отсутствует refresh токен', 'refresh'))
         }
 
-        try {
             const refreshTokenFromDB = await this.usersService.getRefreshToken(refresh_token);
             if (!refreshTokenFromDB) {
                 return next(new HttpError(401, 'Неверные учетные данные', 'refresh'))
@@ -141,9 +182,6 @@ export class UsersController extends BaseController implements IUsersController 
 
                 this.ok(res, { email, role, name, access_token: accessToken });
             }
-        } catch (e) {
-            return next(new HttpError(500, 'Ошибка', 'refresh'))
-        }
     }
 
     private verifyRefreshToken (refreshToken: string):Promise<IUserData | null> {

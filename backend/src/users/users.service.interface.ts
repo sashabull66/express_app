@@ -12,4 +12,7 @@ export interface IUsersService {
     saveToken: (token: Token) => Promise<DocumentType<Token> | null>;
     getRefreshToken: (token: Token['refreshToken']) => Promise<DocumentType<Token> | null>;
     logout: (id: Types.ObjectId) => Promise<DocumentType<any> | null>;
+    updateUserData: (newUserData: User) => Promise<DocumentType<any> | null>;
+    removeUser: (id: Types.ObjectId) => Promise<DocumentType<any> | null>;
+    getUsers: () => Promise<DocumentType<User>[] | null>;
 }

@@ -1,5 +1,7 @@
 export const Endpoints = {
     AUTH: {
+        ROOT: '/users',
+        USER: '/users/user',
         LOGIN: '/users/login',
         REFRESH: '/users/refresh',
         LOGOUT: '/users/logout',

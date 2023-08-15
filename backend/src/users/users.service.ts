@@ -11,6 +11,7 @@ import 'reflect-metadata'
 import {SaveTokenDto} from "./dto/save-token.dto.js";
 import {Token, TokenModel} from "./token.model.js";
 import {Types} from "mongoose";
+import {TodoModel} from "../todos/todo.model.js";
 
 @injectable()
 export class UsersService implements IUsersService {
@@ -18,9 +19,7 @@ export class UsersService implements IUsersService {
         @inject(TYPES.ConfigService)
         private readonly configService: ConfigService
     ) {}
-
-
-    async saveToken ({refreshToken, userId}:SaveTokenDto): Promise<DocumentType<Token> | null> {
+    async saveToken ({ refreshToken, userId}:SaveTokenDto): Promise<DocumentType<Token> | null> {
         const prevToken = await TokenModel.findOne({ userId }).exec();
 
         if (prevToken) {
@@ -34,21 +33,33 @@ export class UsersService implements IUsersService {
     }
 
     async getRefreshToken (refreshToken: string): Promise<DocumentType<Token> | null> {
-        const tokenData = await TokenModel.findOne({ refreshToken }).exec();
+        try {
+            const tokenData = await TokenModel.findOne({ refreshToken }).exec();
 
-        return tokenData || null
+            return tokenData || null
+        } catch (e) {
+            return null
+        }
     }
 
     async login ({ email }: Pick<UserLoginDto, 'email'>): Promise<DocumentType<User> | null> {
-        const foundUser = await UserModel.findOne({ email }).exec();
+        try {
+            const foundUser = await UserModel.findOne({ email }).exec();
 
-        return foundUser || null
+            return foundUser || null
+        } catch (e) {
+            return null
+        }
     };
 
     async getUserById (id: Types.ObjectId): Promise<DocumentType<User> | null> {
-        const foundUser = await UserModel.findOne({ _id: id }).exec();
+        try {
+            const foundUser = await UserModel.findOne({ _id: id }).exec();
 
-        return foundUser || null
+            return foundUser || null
+        } catch (e) {
+            return null
+        }
     };
 
     async logout (id: Types.ObjectId): Promise<DocumentType<any> | null> {
@@ -61,22 +72,51 @@ export class UsersService implements IUsersService {
         }
     };
 
+    async updateUserData (newUserData: User): Promise<DocumentType<any> | null> {
+        try {
+            const updatedUser = await UserModel.findByIdAndUpdate(newUserData._id, newUserData).exec();
+
+            return updatedUser || null
+        } catch (e) {
+            return  null
+        }
+    };
+
+    async removeUser (id: Types.ObjectId): Promise<DocumentType<any> | null> {
+        try {
+            await TokenModel.findOneAndRemove({ userId: id }).exec();
+            await TodoModel.deleteMany({ userId: id }).exec()
+            const deletedUser = await UserModel.findOneAndRemove({ _id: id }).exec();
+
+            return deletedUser || null
+        } catch (e) {
+            return  null
+        }
+    };
+
+    async getUsers (): Promise<DocumentType<User>[] | null> {
+        try {
+            return await UserModel.find({}, { _id: 1, name: 1, role: 1, email: 1 });
+        } catch (e) {
+            return null
+        }
+    }
+
     async register ({ email, name, role, password }: UserRegisterDto): Promise<DocumentType<User> | null> {
-        const foundUser = await UserModel.findOne({ email }).exec();
+        try {
+            const foundUser = await UserModel.findOne({ email }).exec();
 
-        if (!foundUser) {
-            const newUser = new UserEntity(email, name, role)
-            const salt = this.configService.get('SALT');
+            if (!foundUser) {
+                const newUser = new UserEntity(email, name, role)
+                const salt = this.configService.get('SALT');
 
-            await newUser.setPassword(password, salt)
+                await newUser.setPassword(password, salt)
 
-            return await UserModel.create({
-                email: newUser.email,
-                name: newUser.name,
-                role: newUser.role,
-                password: newUser.password
-            })
-        } else {
+                return await UserModel.create(newUser.data)
+            } else {
+                return null
+            }
+        } catch (e) {
             return null
         }
     };

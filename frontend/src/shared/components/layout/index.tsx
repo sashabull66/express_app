@@ -1,8 +1,6 @@
 import React from "react";
-
-import styles from "./style.module.css";
-import {Header} from "./header";
-import {useAppSelector} from "../../store";
+import {useAppSelector} from "../../../store";
+import {Header} from "../header";
 
 type Props = {
     children?: React.ReactNode

@@ -48,7 +48,6 @@ export const RefreshUserData = (callback?: () => void) => async (dispatch: Dispa
         dispatch(loginStart());
         const result = await api.auth.Refresh();
 
-        console.log(result.data)
         localStorage.setItem('token', result.data.access_token)
         dispatch(loginSuccess(result.data))
 

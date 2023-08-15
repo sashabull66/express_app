@@ -21,7 +21,16 @@ export class UserEntity {
     }
 
     get password(): string {
-        return  this._password
+        return this._password
+    }
+
+    get data() {
+        return {
+            email: this._email,
+            name: this._name,
+            role: this._role,
+            password: this._password
+        }
     }
 
     public async setPassword(password: string, salt: string): Promise<void> {

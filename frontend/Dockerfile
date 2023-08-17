@@ -6,5 +6,5 @@ COPY . .
 RUN yarn build
 
 FROM nginx:latest
-COPY --from=FRONT_APP app/build /usr/share/nginx/html
+COPY --from=FRONT_APP app/build /var/www/example
 COPY nginx.conf /etc/nginx

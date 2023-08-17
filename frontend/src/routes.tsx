@@ -28,12 +28,6 @@ const AdminRoute = () => {
     return profile?.role === 'admin' ? <Outlet /> : <Navigate to="/" />
 }
 
-const UnauthorizedRoute = () => {
-    const { profile } = useAppSelector(state => state.auth);
-
-    return !profile ? <Outlet /> : <Navigate to="/" />
-}
-
 export const Router = () => {
     const dispatch = useAppDispatch();
 

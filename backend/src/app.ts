@@ -32,12 +32,11 @@ export class App {
     }
 
     useMiddleware (): void {
-        const secret = this.configService.get('ACCESS_TOKEN_SECRET');
         /**
          * Middleware которые будет брать из request.headers.authorization jwt токен,
          * парсить его и класть в этот же request role и login из токена.
          * */
-        const authMiddleware = new AuthMiddleware(secret);
+        const authMiddleware = new AuthMiddleware();
         // Нужен для работы с body (библиотека: body-parser)
         this.app.use(pkg.json());
         this.app.use(authMiddleware.execute.bind(authMiddleware));

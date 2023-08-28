@@ -4,11 +4,11 @@ import {Login} from "./shared/pages/login/login";
 import {useAppDispatch, useAppSelector} from "./store";
 import {Dashboard} from "./shared/pages/dashboard";
 import {Register} from "./shared/pages/register";
-import {RefreshUserData} from "./store/auth/action-creators";
 import {Todos} from "./shared/pages/todos";
 import {AdminPage} from "./shared/pages/admin";
 import {Users} from "./shared/pages/admin/users";
 import {Todos as ATodos} from "./shared/pages/admin/todos";
+import {loginSuccess} from "./store/auth/auth-reducer";
 
 
 const PrivateRoute = () => {
@@ -32,9 +32,9 @@ export const Router = () => {
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        const token = localStorage.getItem('token')
-        if (token) {
-            dispatch(RefreshUserData())
+        const userData = localStorage.getItem('user');
+        if (userData) {
+            dispatch(loginSuccess(JSON.parse(userData)))
         }
     },[dispatch])
 

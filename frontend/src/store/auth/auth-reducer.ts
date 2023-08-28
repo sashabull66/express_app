@@ -2,7 +2,6 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ILoginResponse} from "../../api/auth/types";
 
 export interface IAuthState {
-        accessToken: string | null;
         profile: {
             name: string;
             email: string;
@@ -14,7 +13,6 @@ export interface IAuthState {
 }
 
 export const initialState: IAuthState = {
-        accessToken: null,
         profile: null,
         isLoading: true,
         error: null
@@ -33,7 +31,6 @@ const AuthReducer = createSlice({
             ...state,
             isLoading: false,
             error: null,
-            accessToken: action.payload.access_token,
             profile: {
                 name: action.payload.name,
                 email: action.payload.email,
@@ -43,7 +40,6 @@ const AuthReducer = createSlice({
         loginFailure: (state, action: PayloadAction<string>)=>({
             ...state,
             isLoading: false,
-            accessToken: null,
             error: action.payload,
         }),
         logoutSuccess: ():IAuthState => initialState

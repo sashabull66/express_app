@@ -13,4 +13,4 @@ export const Endpoints = {
     }
 };
 
-export const BASE_URL = 'http://' + window.location.host + '/api';
+export const BASE_URL = window.location.protocol + '//' + window.location.host + '/api';

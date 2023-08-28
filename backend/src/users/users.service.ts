@@ -8,10 +8,10 @@ import {UserEntity} from "./user.entity.js";
 import {UserRegisterDto} from "./dto/user-register.dto.js";
 import {UserLoginDto} from "./dto/user-login.dto.js";
 import 'reflect-metadata'
-import {SaveTokenDto} from "./dto/save-token.dto.js";
-import {Token, TokenModel} from "./token.model.js";
 import {Types} from "mongoose";
 import {TodoModel} from "../todos/todo.model.js";
+import {UserSessionDto} from "./dto/user-session.dto.js";
+import {UserSession, UserSessionModel} from "./user-session.model.js";
 
 @injectable()
 export class UsersService implements IUsersService {
@@ -19,28 +19,6 @@ export class UsersService implements IUsersService {
         @inject(TYPES.ConfigService)
         private readonly configService: ConfigService
     ) {}
-    async saveToken ({ refreshToken, userId}:SaveTokenDto): Promise<DocumentType<Token> | null> {
-        const prevToken = await TokenModel.findOne({ userId }).exec();
-
-        if (prevToken) {
-            prevToken.refreshToken = refreshToken
-            return await prevToken.save()
-        }
-
-        return await TokenModel.create({
-            userId, refreshToken
-        })
-    }
-
-    async getRefreshToken (refreshToken: string): Promise<DocumentType<Token> | null> {
-        try {
-            const tokenData = await TokenModel.findOne({ refreshToken }).exec();
-
-            return tokenData || null
-        } catch (e) {
-            return null
-        }
-    }
 
     async login ({ email }: Pick<UserLoginDto, 'email'>): Promise<DocumentType<User> | null> {
         try {
@@ -51,6 +29,18 @@ export class UsersService implements IUsersService {
             return null
         }
     };
+
+    async createSession (dto: UserSessionDto):Promise<DocumentType<UserSession> | null> {
+        try {
+            await UserSessionModel.deleteMany({userId: dto.userId}).exec()
+            const newSession = await UserSessionModel.create(dto);
+
+            return newSession || null
+        } catch (e) {
+            return null
+        }
+    }
+
 
     async getUserById (id: Types.ObjectId): Promise<DocumentType<User> | null> {
         try {
@@ -64,9 +54,9 @@ export class UsersService implements IUsersService {
 
     async logout (id: Types.ObjectId): Promise<DocumentType<any> | null> {
         try {
-            const deletedToken = await TokenModel.findOneAndRemove({ userId: id }).exec();
+           const deletedSession = await UserSessionModel.findOneAndRemove({ userId: id }).exec();
 
-            return deletedToken || null
+            return deletedSession || null
         } catch (e) {
             return  null
         }
@@ -84,7 +74,6 @@ export class UsersService implements IUsersService {
 
     async removeUser (id: Types.ObjectId): Promise<DocumentType<any> | null> {
         try {
-            await TokenModel.findOneAndRemove({ userId: id }).exec();
             await TodoModel.deleteMany({ userId: id }).exec()
             const deletedUser = await UserModel.findOneAndRemove({ _id: id }).exec();
 

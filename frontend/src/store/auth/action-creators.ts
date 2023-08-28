@@ -9,7 +9,7 @@ export const LoginUser = (params: ILoginRequest, callback?: () => void) => async
         const result = await api.auth.Login(params);
 
         dispatch(loginSuccess(result.data))
-        localStorage.setItem('token', result.data.access_token)
+        localStorage.setItem('user', JSON.stringify(result.data))
 
         if (callback) callback();
         
@@ -35,25 +35,10 @@ export const LogoutUser = (callback?: () => void) => async (dispatch: Dispatch) 
         await api.auth.Logout();
 
         dispatch(logoutSuccess())
-        localStorage.removeItem('token')
+        localStorage.removeItem('user')
 
         if (callback) callback();
     } catch (e: any) {
         console.error(e.response?.data?.message)
-    }
-}
-
-export const RefreshUserData = (callback?: () => void) => async (dispatch: Dispatch) => {
-    try {
-        dispatch(loginStart());
-        const result = await api.auth.Refresh();
-
-        localStorage.setItem('token', result.data.access_token)
-        dispatch(loginSuccess(result.data))
-
-        if (callback) callback();
-
-    } catch (e: any) {
-        dispatch(loginFailure(e.message))
     }
 }

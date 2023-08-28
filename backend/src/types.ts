@@ -19,7 +19,14 @@ export interface ICriteria {
 }
 
 export interface IUserData {
-    id: Types.ObjectId,
+    userId: Types.ObjectId,
     email: string,
     role: 'admin' | 'user'
+}
+
+export interface IFingerprint {
+    ip: string,
+    userAgent: string,
+    acceptLanguage: string,
+    timezone: string
 }

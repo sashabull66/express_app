@@ -1,7 +1,7 @@
 import {inject, injectable} from "inversify";
 import {BaseController} from "../common/base.controller.js";
 import {IUsersController} from "./users.controller.interface.js";
-import {IUserData, TYPES} from "../types.js";
+import {IFingerprint, TYPES} from "../types.js";
 import {ILogger} from "../logger/logger.interface.js";
 import {HttpError} from "../errors/http-error.class.js";
 import {NextFunction, Request, Response} from "express";
@@ -9,13 +9,14 @@ import {UsersService} from "./users.service.js";
 import {UserRegisterDto} from "./dto/user-register.dto.js";
 import {UserLoginDto} from "./dto/user-login.dto.js";
 import {ValidateMiddleware} from "../common/validate.middleware.js";
-import pkg from 'jsonwebtoken';
 import pk from "bcryptjs";
 import 'reflect-metadata'
 import {ConfigService} from "../config/config.service.js";
 import {AuthGuard} from "../common/auth.guard.js";
 import {User} from "./user.model.js";
 import {Types} from "mongoose";
+import {UserSessionEntity} from "./user-session.entity.js";
+import moment from "moment-timezone";
 
 @injectable()
 export class UsersController extends BaseController implements IUsersController {
@@ -49,11 +50,6 @@ export class UsersController extends BaseController implements IUsersController 
                 middlewares: [new AuthGuard()],
             },
             {
-                path:'/refresh',
-                func: this.refresh,
-                method: 'get',
-            },
-            {
                 path:'/user',
                 func: this.updateUser,
                 method: 'patch',
@@ -85,18 +81,28 @@ export class UsersController extends BaseController implements IUsersController 
                 } else {
                     const { email, role, _id: id, name } = user;
 
-                    const accessTokenSecret = this.configService.get('ACCESS_TOKEN_SECRET');
-                    const accessToken = await this.signJWT({ id, email, role }, accessTokenSecret, '1m');
+                    const fingerprint:IFingerprint = {
+                        ip: req.headers['x-forwarded-for'] as string,
+                        userAgent: req.headers['user-agent'] as string,
+                        acceptLanguage: req.headers['accept-language'] as string,
+                        timezone: moment.tz.guess(),
+                    }
 
-                    const refreshTokenSecret = this.configService.get('REFRESH_TOKEN_SECRET');
-                    const refreshToken = await this.signJWT({ id, email, role }, refreshTokenSecret, '30d');
+                    const session = new UserSessionEntity(email, fingerprint, name, id, role);
 
-                    await this.usersService.saveToken({ refreshToken, userId: id })
+                    await this.usersService.createSession({
+                        email: session.email,
+                        userId: session.userId,
+                        name: session.name,
+                        role: session.role,
+                        sessionId: session.sessionId,
+                        fingerprint: session.fingerprint
+                    })
 
-                    res.cookie('refresh_token', refreshToken, {
+                    res.cookie('session_id', session.sessionId, {
                         httpOnly: true
                     })
-                    this.ok(res, { email, role, name, access_token: accessToken });
+                    this.ok(res, { email, role, name });
                 }
             } else {
                 return next(new HttpError(401, 'Пользователь не существует', 'login'));
@@ -140,79 +146,9 @@ export class UsersController extends BaseController implements IUsersController 
     }
 
     async logout (req: Request, res: Response, next: NextFunction): Promise<void> {
-        await this.usersService.logout(req.user.id)
-        res.clearCookie('access_token');
-        res.clearCookie('refresh_token');
+        await this.usersService.logout(req.user.userId)
+        res.clearCookie('session_id');
         this.ok(res, 'Logout success')
-    }
-
-    async refresh (req: Request, res: Response, next: NextFunction): Promise<void> {
-        const { refresh_token } = req.cookies;
-
-        if (!refresh_token) {
-            return next(new HttpError(401, 'Отсутствует refresh токен', 'refresh'))
-        }
-
-            const refreshTokenFromDB = await this.usersService.getRefreshToken(refresh_token);
-            if (!refreshTokenFromDB) {
-                return next(new HttpError(401, 'Неверные учетные данные', 'refresh'))
-            }
-
-            const verifiedData = await this.verifyRefreshToken(refresh_token);
-            const userData = await this.usersService.getUserById(refreshTokenFromDB.userId)
-
-            if (!verifiedData && !userData) {
-                return next(new HttpError(401, 'Невалидный refresh токен', 'refresh'))
-            }
-
-            if (userData) {
-                const accessTokenSecret = this.configService.get('ACCESS_TOKEN_SECRET');
-                const accessToken = await this.signJWT(userData, accessTokenSecret, '5s');
-
-                const refreshTokenSecret = this.configService.get('REFRESH_TOKEN_SECRET');
-                const refreshToken = await this.signJWT(userData, refreshTokenSecret, '30d');
-
-                await this.usersService.saveToken({ refreshToken, userId: userData._id })
-
-                res.cookie('refresh_token', refreshToken, {
-                    httpOnly: true
-                })
-
-                const { email, role, name } = userData;
-
-                this.ok(res, { email, role, name, access_token: accessToken });
-            }
-    }
-
-    private verifyRefreshToken (refreshToken: string):Promise<IUserData | null> {
-            const secret = this.configService.get('REFRESH_TOKEN_SECRET');
-            return new Promise((resolve, reject) => {
-                pkg.verify(refreshToken, secret, (error, decoded) => {
-                    if (error) {
-                        reject(null)
-                    } else if (decoded) {
-                        resolve(decoded as IUserData)
-                    }
-                })
-            })
-    }
-
-    private signJWT (data: IUserData | Record<string, any>, secret: string, expiresIn:string): Promise<string> {
-        return new Promise((resolve, reject) => {
-            pkg.sign({
-                ...data,
-                iat: Math.floor(Date.now() / 1000)
-            }, secret, {
-                algorithm:'HS256',
-                expiresIn
-            }, (error, encoded)=>{
-                if (error) {
-                    reject(error)
-                } else if (encoded) {
-                    resolve(encoded)
-                }
-            })
-        })
     }
 
     private async comparePassword (pass: string, hash: string): Promise<boolean> {

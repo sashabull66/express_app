@@ -54,7 +54,7 @@ export class TodosController extends BaseController implements ITodosController 
         let criteria: ICriteria = {};
 
         if (req.user.role === 'user') {
-            criteria.userId = req.user.id
+            criteria.userId = req.user.userId
         }
 
         const result = await this.todosService.getTodos(criteria);
@@ -67,7 +67,7 @@ export class TodosController extends BaseController implements ITodosController 
     };
 
     async createTodo (req:Request<{}, {}, TodoDto>, res:Response):Promise<void> {
-        const result = await this.todosService.createTodo({...req.body, userId: req.user.id});
+        const result = await this.todosService.createTodo({...req.body, userId: req.user.userId});
 
         if (result) this.created(res);
     };
@@ -76,7 +76,7 @@ export class TodosController extends BaseController implements ITodosController 
         let criteria: ICriteria = { _id: req.query.id };
 
         if (req.user.role === 'user') {
-            criteria.userId = req.user.id
+            criteria.userId = req.user.userId
         }
 
         const result = await this.todosService.removeTodo(criteria);

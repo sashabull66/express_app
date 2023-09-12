@@ -1,100 +1,104 @@
-import {BaseController} from "../common/base.controller.js";
-import {NextFunction, Request, Response} from "express";
-import {injectable, inject} from "inversify";
-import {ICriteria, TYPES} from "../types.js";
-import {ILogger} from "../logger/logger.interface.js";
-import {ITodosController} from "./todos.controller.interface.js";
-import {TodoDto} from "./dto/todo.dto.js";
-import {TodosService} from "./todos.service.js";
-import {HttpError} from "../errors/http-error.class.js";
-import {Todo} from "./todo.model.js";
-import 'reflect-metadata'
-import {AuthGuard} from "../common/auth.guard.js";
+import { BaseController } from '../common/base.controller.js';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { NextFunction, Request, Response } from 'express';
+import { injectable, inject } from 'inversify';
+import { ICriteria, TYPES } from '../types.js';
+import { ILogger } from '../logger/logger.interface.js';
+import { ITodosController } from './todos.controller.interface.js';
+import { TodoDto } from './dto/todo.dto.js';
+import { TodosService } from './todos.service.js';
+import { HttpError } from '../errors/http-error.class.js';
+import { Todo } from './todo.model.js';
+import 'reflect-metadata';
+import { AuthGuard } from '../common/auth.guard.js';
 
 @injectable()
 export class TodosController extends BaseController implements ITodosController {
+  constructor(
+    @inject(TYPES.ILogger)
+    private loggerService: ILogger,
+    @inject(TYPES.TodoService)
+    private todosService: TodosService,
+  ) {
+    super(loggerService);
+    this.bindRoutes([
+      {
+        path: '/',
+        func: this.getTodos,
+        method: 'get',
+        middlewares: [new AuthGuard()],
+      },
+      {
+        path: '/todo',
+        func: this.createTodo,
+        method: 'post',
+        middlewares: [new AuthGuard()],
+      },
+      {
+        path: '/todo',
+        func: this.removeTodo,
+        method: 'delete',
+        middlewares: [new AuthGuard()],
+      },
+      {
+        path: '/todo',
+        func: this.updateTodo,
+        method: 'patch',
+        middlewares: [new AuthGuard()],
+      },
+    ]);
+  }
 
-    constructor(
-        @inject(TYPES.ILogger)
-        private loggerService: ILogger,
-        @inject(TYPES.TodoService)
-        private todosService: TodosService,
-        )
-        {
-        super(loggerService);
-        this.bindRoutes([
-            {
-                path:'/',
-                func: this.getTodos,
-                method:'get',
-                middlewares:[new AuthGuard()]
-            },
-            {
-                path:'/todo',
-                func: this.createTodo,
-                method:'post',
-                middlewares:[new AuthGuard()]
-            },
-            {
-                path:'/todo',
-                func: this.removeTodo,
-                method:'delete',
-                middlewares:[new AuthGuard()]
-            },
-            {
-                path:'/todo',
-                func: this.updateTodo,
-                method:'patch',
-                middlewares:[new AuthGuard()]
-            }
-        ]);
+  async getTodos(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const criteria: ICriteria = {};
+
+    if (req.user.role === 'user') {
+      criteria.userId = req.user.userId;
     }
 
-    async getTodos (req:Request, res:Response, next:NextFunction):Promise<void> {
-        let criteria: ICriteria = {};
+    const result = await this.todosService.getTodos(criteria);
 
-        if (req.user.role === 'user') {
-            criteria.userId = req.user.userId
-        }
+    if (!result) {
+      return next(new HttpError(404, 'Задачи не найдены', 'todos'));
+    }
 
-        const result = await this.todosService.getTodos(criteria);
+    this.ok(res, result);
+  }
 
-        if (!result) {
-            return next(new HttpError(404, 'Задачи не найдены', 'todos'));
-        }
+  async createTodo(req: Request<{}, {}, TodoDto>, res: Response): Promise<void> {
+    const result = await this.todosService.createTodo({ ...req.body, userId: req.user.userId });
 
-        this.ok(res, result);
-    };
+    if (result) this.created(res);
+  }
 
-    async createTodo (req:Request<{}, {}, TodoDto>, res:Response):Promise<void> {
-        const result = await this.todosService.createTodo({...req.body, userId: req.user.userId});
+  async removeTodo(
+    req: Request<{}, {}, {}, { id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    const criteria: ICriteria = { _id: req.query.id };
 
-        if (result) this.created(res);
-    };
+    if (req.user.role === 'user') {
+      criteria.userId = req.user.userId;
+    }
 
-    async  removeTodo (req:Request<{}, {}, {}, { id: string }>, res:Response, next:NextFunction):Promise<void> {
-        let criteria: ICriteria = { _id: req.query.id };
+    const result = await this.todosService.removeTodo(criteria);
 
-        if (req.user.role === 'user') {
-            criteria.userId = req.user.userId
-        }
+    if (!result) {
+      return next(new HttpError(422, `Не удалось удалить задачу ${criteria._id}`, 'todo'));
+    }
 
-        const result = await this.todosService.removeTodo(criteria);
+    this.ok(res, `Задача ${criteria.id} успешно удалена`);
+  }
 
-        if (!result) {
-            return next(new HttpError(422, `Не удалось удалить задачу ${ criteria._id }`, 'todo'));
-        }
+  async updateTodo(req: Request<{}, {}, Todo>, res: Response, next: NextFunction): Promise<void> {
+    const result = await this.todosService.updateTodo(req.body);
 
-        this.ok(res, `Задача ${ criteria.id } успешно удалена`);
-    };
+    if (!result) {
+      return next(new HttpError(422, 'Не удалось обновить задачу', 'todo'));
+    }
 
-    async updateTodo (req:Request<{}, {}, Todo>, res:Response, next:NextFunction):Promise<void> {
-        const result = await this.todosService.updateTodo(req.body);
-
-        if (!result) {
-            return next(new HttpError(422, 'Не удалось обновить задачу', 'todo'));
-        }
-
-        this.ok(res, `Задача ${result.title} успешно обновлена`);
-    };
+    this.ok(res, `Задача ${result.title} успешно обновлена`);
+  }
 }

@@ -1,8 +1,8 @@
 .item {
-    border: 1px solid seagreen;
-    margin: 5px;
+  border: 1px solid seagreen;
+  margin: 5px;
 }
 
 .done {
-    text-decoration: line-through;
+  text-decoration: line-through;
 }

@@ -1,9 +1,9 @@
-import * as auth from './auth/index'
-import * as todos from './todos/index'
+import * as auth from './auth/index';
+import * as todos from './todos/index';
 
 const api = {
-    auth,
-    todos
-}
+  auth,
+  todos,
+};
 
-export default api
+export default api;

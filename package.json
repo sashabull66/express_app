@@ -1,0 +1,25 @@
+{
+  "name": "my-project",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "lint": "yarn eslint ./frontend/src --ext .ts,.tsx && yarn eslint ./backend/src --ext .ts,.tsx",
+    "lint:fix": "yarn eslint ./frontend/src --ext .ts,.tsx --fix && yarn eslint ./backend/src --ext .ts,.tsx --fix",
+    "format": "prettier ./frontend/src --write && prettier ./backend/src --write",
+    "postinstall": "(cd frontend && yarn install); (cd backend && yarn install)",
+    "clear-modules": "(cd ./frontend && rm -rf node_modules) && (cd ./backend && rm -rf node_modules); (rm -rf node_modules)"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "eslint": "^8.49.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "husky": "8.0.3",
+    "lint-staged": "^14.0.1",
+    "prettier": "^3.0.3"
+  }
+}

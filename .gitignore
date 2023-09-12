@@ -1,5 +1,7 @@
 backend/node_modules
 frontend/node_modules
+node_modules
+.DS_Store
 frontend/dist
 backend/dist
 backend/mongo-data
@@ -12,3 +14,4 @@ frontend/.env
 backend/.env
 frontend/yarn-error.log
 backend/yarn-error.log
+.idea

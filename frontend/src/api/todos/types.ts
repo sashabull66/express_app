@@ -1,25 +1,24 @@
-import {AxiosPromise} from "axios";
+import { AxiosPromise } from 'axios';
 
 export interface ITodosResponse {
-    _id: string;
-    title: string,
-    description: string,
-    done: boolean,
+  _id: string;
+  title: string;
+  description: string;
+  done: boolean;
 }
 
-
 export interface IGetTodos {
-    ():AxiosPromise<Array<ITodosResponse>>
+  (): AxiosPromise<Array<ITodosResponse>>;
 }
 
 export interface IUpdateTodo {
-    (params: ITodosResponse):AxiosPromise<string>
+  (params: ITodosResponse): AxiosPromise<string>;
 }
 
 export interface IRemoveTodo {
-    (id: string):AxiosPromise<string>
+  (id: string): AxiosPromise<string>;
 }
 
 export interface IAddTodo {
-    (params: Pick<ITodosResponse, 'description' & 'title' & 'done'>):AxiosPromise<string>
+  (params: Pick<ITodosResponse, 'description' & 'title' & 'done'>): AxiosPromise<string>;
 }

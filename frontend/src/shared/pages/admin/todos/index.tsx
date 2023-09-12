@@ -1,8 +1,5 @@
-import React from "react";
+import React from 'react';
 
-export const Todos = () => {
-
-    return (
-        <div>todos</div>
-    )
-}
+export const Todos: React.FC = () => {
+  return <div>todos</div>;
+};

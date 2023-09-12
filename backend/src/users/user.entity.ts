@@ -1,39 +1,39 @@
-import pk from "bcryptjs";
+import pk from 'bcryptjs';
 
 export class UserEntity {
-    private _password: string;
-    constructor(
-        private readonly _email: string,
-        private readonly _name: string,
-        private readonly _role: 'admin' | 'user'
-    ) {}
+  private _password: string;
+  constructor(
+    private readonly _email: string,
+    private readonly _name: string,
+    private readonly _role: 'admin' | 'user',
+  ) {}
 
-    get email(): string {
-        return this._email
-    }
+  get email(): string {
+    return this._email;
+  }
 
-    get name(): string {
-        return this._name
-    }
+  get name(): string {
+    return this._name;
+  }
 
-    get role(): 'admin' | 'user' {
-        return this._role
-    }
+  get role(): 'admin' | 'user' {
+    return this._role;
+  }
 
-    get password(): string {
-        return this._password
-    }
+  get password(): string {
+    return this._password;
+  }
 
-    get data() {
-        return {
-            email: this._email,
-            name: this._name,
-            role: this._role,
-            password: this._password
-        }
-    }
+  get data(): { email: string; name: string; role: string; password: string } {
+    return {
+      email: this._email,
+      name: this._name,
+      role: this._role,
+      password: this._password,
+    };
+  }
 
-    public async setPassword(password: string, salt: string): Promise<void> {
-        this._password = await pk.hash(password, Number(salt));
-    }
+  public async setPassword(password: string, salt: string): Promise<void> {
+    this._password = await pk.hash(password, Number(salt));
+  }
 }

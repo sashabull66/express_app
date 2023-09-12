@@ -1,18 +1,18 @@
-import React from "react";
-import {useAppSelector} from "../../../store";
-import {Header} from "../header";
+import React from 'react';
+import { useAppSelector } from '../../../store';
+import { Header } from '../header';
 
 type Props = {
-    children?: React.ReactNode
-}
+  children?: React.ReactNode;
+};
 
-export const Layout: React.FC<Props> = ({children}) => {
-    const { profile } = useAppSelector(state => state.auth);
+export const Layout: React.FC<Props> = ({ children }) => {
+  const { profile } = useAppSelector((state) => state.auth);
 
-    return (
-        <div>
-            {profile && <Header/>}
-            {children}
-        </div>
-    )
-}
+  return (
+    <div>
+      {profile && <Header />}
+      {children}
+    </div>
+  );
+};

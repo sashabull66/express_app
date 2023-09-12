@@ -1,14 +1,13 @@
-import React from "react";
-import {AllUsers} from "./all-users";
-import {RemoveUserForm} from "./remove-user";
+import React from 'react';
+import { AllUsers } from './all-users';
+import { RemoveUserForm } from './remove-user';
 
-export const Users = () => {
-
-    return (
-        <>
-            <div>users</div>
-            <AllUsers/>
-            <RemoveUserForm/>
-        </>
-    )
-}
+export const Users: React.FC = () => {
+  return (
+    <>
+      <div>users</div>
+      <AllUsers />
+      <RemoveUserForm />
+    </>
+  );
+};

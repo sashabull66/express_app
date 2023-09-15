@@ -3,7 +3,7 @@ services:
   express-server:
     restart: on-failure
     build:
-      context: backend
+      context: .
       dockerfile: Dockerfile
     ports:
       - "4200-4204:4200"
@@ -29,7 +29,7 @@ services:
       - app-net
   nginx:
     build:
-      context: frontend
+      context: ./nginx
       dockerfile: Dockerfile
     container_name: my-nginx
     depends_on:
@@ -40,5 +40,5 @@ services:
     networks:
       - app-net
 networks:
-  app-net:
-    driver: bridge
+    app-net:
+      driver: bridge
